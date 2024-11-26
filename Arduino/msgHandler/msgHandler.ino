@@ -12,7 +12,6 @@ void loop(){
     if (msg->getContent() == "check"){
       temp = random(10, 60);
       perc = random(0,100);
-      delay(3000);
       MsgService.sendMsg((String)perc+":"+temp); 
     } else if (msg->getContent() == "empty") {
       //do stuff, then answer
