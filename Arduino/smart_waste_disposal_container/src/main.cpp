@@ -1,8 +1,10 @@
-#include "Led.h"
-#include "ServoImpl.h"
-#include "Pir.h"
-#include "Button.h" 
-#include "Screen.h"
+#include <Arduino.h>
+
+#include "devices/Led.h"
+#include "devices/ServoImpl.h"
+#include "devices/Pir.h"
+#include "devices/Button.h" 
+#include "devices/Screen.h"
 
 #define LED_GREEN 7
 #define LED_RED 8
