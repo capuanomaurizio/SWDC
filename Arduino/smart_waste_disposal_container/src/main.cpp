@@ -20,36 +20,42 @@
 
 Led* ledGreen;
 Led* ledRed;
-ServoImpl* servoImpl;
+ServoImpl* servo;
 Pir* pir;
 Button* button;
 Screen* screen;
+
+void acceptingWaste();
+void initialScreen();
 
 void setup() {
   Serial.begin(9600);
   ledGreen = new Led(LED_GREEN);
   ledRed = new Led(LED_RED);
-  servoImpl = new ServoImpl(SERVO);
+  servo = new ServoImpl(SERVO);
   pir = new Pir(PIR);
   button = new Button(BUTTON_OPEN);
   screen = new Screen(16, 4);
-  acceptingWaste();
+  //acceptingWaste();
 }
 
 void loop() {
-  if(pir->isDetected()){
-    Serial.println("SIIIIIi");
-  }
-  else{
-    Serial.println("NOOOO");
-  }
+  // if(pir->isDetected()){
+  //   Serial.println("SIIII");
+  // }
+  // else{
+  //   Serial.println("NOOOO");
+  // }
+  ledGreen->switchOn();
+  delay(3000);
+  ledGreen->switchOff();
 }
 
 
 void acceptingWaste(){
   initialScreen();
   ledGreen->switchOn();
-  servoImpl->setPosition(CLOSE_SERVO);
+  servo->setPosition(CLOSE_SERVO);
 }
 
 void initialScreen(){

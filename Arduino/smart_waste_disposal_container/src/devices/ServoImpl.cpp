@@ -1,8 +1,5 @@
 #include "ServoImpl.h"
-#include <Servo.h>
 #include "Arduino.h"
-
-Servo servo;
 
 ServoImpl::ServoImpl(int pin){
     this->pin = pin;
