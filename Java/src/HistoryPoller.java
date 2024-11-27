@@ -28,10 +28,12 @@ public class HistoryPoller extends Thread {
                     this.history.log("PREVIOUS VALUES: filling percentage: "+fillingPerc+"%   temperature: "+temperature+"°C");
                     dashboard.updateFillingPerc(fillingPerc);
                     dashboard.updateTemperature(temperature);
-                    // dashboard.enableEmpty();
-                    // dashboard.enableRestore();
+                } 
+				else {
+					dashboard.enableEmpty();
+                    dashboard.enableRestore();
                     dashboard.enableCheck();
-                }
+				}
 				/*if (msg.startsWith(PLANT_PREFIX)){
 					String cmd = msg.substring(PLANT_PREFIX.length()); 
 					// logger.log("new command: "+cmd);				

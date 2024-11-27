@@ -5,6 +5,7 @@
 #include "devices/Pir.h"
 #include "devices/Button.h" 
 #include "devices/Screen.h"
+#include "serial/MsgService.h"
 
 #define LED_GREEN 7
 #define LED_RED 8
@@ -37,6 +38,7 @@ void setup() {
   button = new Button(BUTTON_OPEN);
   screen = new Screen(16, 4);
   //acceptingWaste();
+  MsgService.init();
 }
 
 void loop() {
@@ -46,9 +48,31 @@ void loop() {
   // else{
   //   Serial.println("NOOOO");
   // }
-  ledGreen->switchOn();
-  delay(3000);
-  ledGreen->switchOff();
+  // ledGreen->switchOn();
+  // delay(1000);
+  // ledGreen->switchOff();
+  // delay(1000);
+  int temp = 0, perc = 0;
+  if (MsgService.isMsgAvailable()){
+    Msg* msg = MsgService.receiveMsg();    
+    if (msg->getContent() == "check"){
+      temp = random(10, 60);
+      perc = random(0,100);
+      MsgService.sendMsg((String)perc+":"+temp); 
+    } else if (msg->getContent() == "empty") {
+      ledGreen->switchOn();
+      delay(1000);
+      ledGreen->switchOff();
+      MsgService.sendMsg("emptied");
+    } else if (msg->getContent() == "restore") {
+      ledRed->switchOn();
+      delay(1000);
+      ledRed->switchOff();
+      MsgService.sendMsg("restored");
+    }
+    /* NOT TO FORGET: msg deallocation */
+    delete msg;
+  }
 }
 
 

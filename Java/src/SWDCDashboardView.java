@@ -42,10 +42,10 @@ public class SWDCDashboardView extends JFrame implements ActionListener{
 
 		JPanel buttonsPanel = new JPanel();
 		emptyContainer = new JButton("Empty container");
-		emptyContainer.setEnabled(false);
+		emptyContainer.setEnabled(true);
 		emptyContainer.addActionListener(this);
         restoreContainer = new JButton("Restore container");
-		restoreContainer.setEnabled(false);
+		restoreContainer.setEnabled(true);
 		restoreContainer.addActionListener(this);
         checkState = new JButton("Check state");
 		checkState.setEnabled(true);
