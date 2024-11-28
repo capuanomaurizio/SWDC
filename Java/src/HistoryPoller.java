@@ -29,11 +29,9 @@ public class HistoryPoller extends Thread {
                     dashboard.updateFillingPerc(fillingPerc);
                     dashboard.updateTemperature(temperature);
                 } 
-				else {
-					dashboard.enableEmpty();
-                    dashboard.enableRestore();
-                    dashboard.enableCheck();
-				}
+				dashboard.enableEmpty();
+				dashboard.enableRestore();
+				dashboard.enableCheck();
 				/*if (msg.startsWith(PLANT_PREFIX)){
 					String cmd = msg.substring(PLANT_PREFIX.length()); 
 					// logger.log("new command: "+cmd);				
