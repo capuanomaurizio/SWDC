@@ -5,7 +5,7 @@
 #include "devices/Pir.h"
 #include "devices/Button.h" 
 #include "devices/Screen.h"
-#include "serial/MsgService.h"
+#include "serial/CommManager.h"
 
 #define LED_GREEN 7
 #define LED_RED 8
@@ -25,65 +25,68 @@ ServoImpl* servo;
 Pir* pir;
 Button* button;
 Screen* screen;
+CommManager* commManager;
+String requiredAction; //"check" "empty" "restore" are the possible messages
 
 void acceptingWaste();
 void initialScreen();
+void checkSerialComm();
 
 void setup() {
-  Serial.begin(9600);
-  ledGreen = new Led(LED_GREEN);
-  ledRed = new Led(LED_RED);
-  servo = new ServoImpl(SERVO);
-  pir = new Pir(PIR);
-  button = new Button(BUTTON_OPEN);
-  screen = new Screen(16, 4);
-  //acceptingWaste();
-  MsgService.init();
+    // Serial.begin(9600);
+    ledGreen = new Led(LED_GREEN);
+    ledRed = new Led(LED_RED);
+    servo = new ServoImpl(SERVO);
+    pir = new Pir(PIR);
+    button = new Button(BUTTON_OPEN);
+    screen = new Screen(16, 4);
+    commManager = new CommManager();
+    requiredAction = "";
+    //acceptingWaste();
 }
 
 void loop() {
-  // if(pir->isDetected()){
-  //   Serial.println("SIIII");
-  // }
-  // else{
-  //   Serial.println("NOOOO");
-  // }
-  // ledGreen->switchOn();
-  // delay(1000);
-  // ledGreen->switchOff();
-  // delay(1000);
-  int temp = 0, perc = 0;
-  if (MsgService.isMsgAvailable()){
-    Msg* msg = MsgService.receiveMsg();    
-    if (msg->getContent() == "check"){
-      temp = random(10, 60);
-      perc = random(0,100);
-      MsgService.sendMsg((String)perc+":"+temp); 
-    } else if (msg->getContent() == "empty") {
-      ledGreen->switchOn();
-      delay(1000);
-      ledGreen->switchOff();
-      MsgService.sendMsg("emptied");
-    } else if (msg->getContent() == "restore") {
-      ledRed->switchOn();
-      delay(1000);
-      ledRed->switchOff();
-      MsgService.sendMsg("restored");
-    }
-    /* NOT TO FORGET: msg deallocation */
-    delete msg;
-  }
+    // if(pir->isDetected()){
+    //   Serial.println("SIIII");
+    // }
+    // else{
+    //   Serial.println("NOOOO");
+    // }
+    // ledGreen->switchOn();
+    // delay(1000);
+    // ledGreen->switchOff();
+    // delay(1000);
+    checkSerialComm();
 }
 
 
+void checkSerialComm(){
+    requiredAction = commManager->checkReceived();
+    if(requiredAction != ""){
+        if(requiredAction == "check") {
+            commManager->sendPercentageTemperature(random(0,100), random(10, 60));
+        } else if (requiredAction == "empty") {
+            ledGreen->switchOn();
+            delay(200);
+            ledGreen->switchOff();
+            commManager->endEmptyContainer();
+        } else if (requiredAction == "restore") {
+            ledRed->switchOn();
+            delay(200);
+            ledRed->switchOff();
+            commManager->endRestoreContainer();
+        }
+    }
+}
+
 void acceptingWaste(){
-  initialScreen();
-  ledGreen->switchOn();
-  servo->setPosition(CLOSE_SERVO);
+    initialScreen();
+    ledGreen->switchOn();
+    servo->setPosition(CLOSE_SERVO);
 }
 
 void initialScreen(){
-  screen->clear();
-  screen->write(0,0, "PRESS OPEN TO");
-  screen->write(0,1, "ENTER WASTE");
+    screen->clear();
+    screen->write(0,0, "PRESS OPEN TO");
+    screen->write(0,1, "ENTER WASTE");
 }
