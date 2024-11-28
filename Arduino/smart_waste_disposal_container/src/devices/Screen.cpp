@@ -1,5 +1,4 @@
 #include "Screen.h"
-#include "Arduino.h"
 #include <LiquidCrystal_I2C.h>
 
 LiquidCrystal_I2C* lcd;
@@ -11,7 +10,7 @@ Screen::Screen(int cols, int rows){
     clear();
 }
 
-void Screen::write(int cols, int rows, char text[]){
+void Screen::write(int cols, int rows, String text){
     lcd->setCursor(cols, rows);
     lcd->print(text);
 }
