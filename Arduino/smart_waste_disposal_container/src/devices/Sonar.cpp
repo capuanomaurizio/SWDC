@@ -9,9 +9,9 @@ Sonar::Sonar(int echo, int trig){
 }
 
 float Sonar::getDistance(){
-    digitalWrite(this->trigPin,LOW);
-    delayMicroseconds(3);
-    digitalWrite(this->trigPin,HIGH);
+  digitalWrite(this->trigPin,LOW);
+  delayMicroseconds(3);
+  digitalWrite(this->trigPin,HIGH);
     delayMicroseconds(5);
     digitalWrite(this->trigPin,LOW);
     
