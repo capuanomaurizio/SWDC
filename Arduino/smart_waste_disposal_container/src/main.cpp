@@ -5,6 +5,7 @@
 #include "devices/Pir.h"
 #include "devices/Button.h" 
 #include "devices/Screen.h"
+#include "devices/Sonar.h"
 #include "serial/CommManager.h"
 
 #define LED_GREEN 7
@@ -14,6 +15,8 @@
 #define PIR_PIN 2
 #define SERVO 9
 #define PIR 2
+#define SONAR_TRIG_PIN 12
+#define SONAR_ECHO_PIN 13
 
 #define CLOSE_SERVO 90
 #define OPEN_SERVO 180
@@ -26,6 +29,7 @@ Pir* pir;
 Button* button;
 Screen* screen;
 CommManager* commManager;
+Sonar* sonar;
 String requiredAction; //"check" "empty" "restore" are the possible messages
 
 void acceptingWaste();
@@ -42,6 +46,7 @@ void setup() {
     screen = new Screen(16, 4);
     commManager = new CommManager();
     requiredAction = "";
+    sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN);
     //acceptingWaste();
 }
 

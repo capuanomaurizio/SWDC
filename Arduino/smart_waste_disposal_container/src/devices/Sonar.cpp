@@ -1,19 +1,21 @@
 #include "Sonar.h"
 #include "Arduino.h"
 
-Sonar::Sonar(int echoPin, int trigPin){
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);  
+Sonar::Sonar(int echo, int trig){
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  this->echoPin = echo;
+  this->trigPin = trig;
 }
 
 float Sonar::getDistance(){
-    digitalWrite(trigPin,LOW);
+    digitalWrite(this->trigPin,LOW);
     delayMicroseconds(3);
-    digitalWrite(trigPin,HIGH);
+    digitalWrite(this->trigPin,HIGH);
     delayMicroseconds(5);
-    digitalWrite(trigPin,LOW);
+    digitalWrite(this->trigPin,LOW);
     
-    /* Receiving the echo */
-    long tUS = pulseInLong(echoPin, HIGH);
-    return tUS;
+    long duration = pulseIn(this->echoPin, HIGH);
+    return duration * 0.034 / 2;
+
 }
