@@ -2,6 +2,8 @@
 #include "Arduino.h"
 
 #define VCC ((float)5)
+#define SCART 32
+#define DIVIDEND 0.55
 
 Temp::Temp(int tempPin){
     this->pin = tempPin;
@@ -11,6 +13,6 @@ Temp::Temp(int tempPin){
 float Temp::getTemperature(){
     int value = analogRead(this->pin);
     float valueInVolt = value*VCC/1023;  
-    float valueInCelsius = valueInVolt/0.01;
+    float valueInCelsius = (valueInVolt/0.01 - SCART) * DIVIDEND;
     return valueInCelsius;
 }
