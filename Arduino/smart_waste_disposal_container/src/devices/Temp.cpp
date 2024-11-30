@@ -1,12 +1,16 @@
 #include "Temp.h"
 #include "Arduino.h"
 
+#define VCC ((float)5)
 
-Temp::Temp(int pin){
-    dht(DHTPIN, DHTTYPE);
-    this->pin = pin
+Temp::Temp(int tempPin){
+    this->pin = tempPin;
+    pinMode(this->pin, INPUT);
 }
 
 float Temp::getTemperature(){
-    return dht.readTemperature();
+    int value = analogRead(this->pin);
+    float valueInVolt = value*VCC/1023;  
+    float valueInCelsius = valueInVolt/0.01;
+    return valueInCelsius;
 }

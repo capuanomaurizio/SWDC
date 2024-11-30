@@ -1,16 +1,12 @@
-#ifndef __TEMP__
-#define __TEMP__
-#define DHTTYPE DHT11
-#include<DHT.h>
-#include "DHT.h"
+#ifndef __TEMP_SENSOR__
+#define __TEMP_SENSOR__
 
 class Temp{
-    public:  
-        Temp(int pin);
+    public:
+        Temp(int tempPin);
         float getTemperature();
     private:
         int pin;
-        DTH dth
 };
 
 #endif

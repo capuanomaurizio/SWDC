@@ -17,7 +17,7 @@
 #define PIR 2
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 13
-#define TEMP_SENSOR 6
+#define TEMP_SENSOR A0
 
 #define CLOSE_SERVO 90
 #define OPEN_SERVO 180
