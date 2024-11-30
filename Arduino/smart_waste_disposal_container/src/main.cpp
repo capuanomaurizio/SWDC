@@ -27,7 +27,8 @@ Led* ledGreen;
 Led* ledRed;
 ServoImpl* servo;
 Pir* pir;
-Button* button;
+Button* buttonOpen;
+Button* buttonClose;
 Screen* screen;
 CommManager* commManager;
 Sonar* sonar;
@@ -42,7 +43,8 @@ void setup() {
     ledRed = new Led(LED_RED);
     servo = new ServoImpl(SERVO);
     pir = new Pir(PIR);
-    button = new Button(BUTTON_OPEN);
+    buttonOpen = new Button(BUTTON_OPEN);
+    buttonOpen = new Button(BUTTON_CLOSE);
     screen = new Screen(16, 4);
     commManager = new CommManager();
     requiredAction = "";
@@ -87,4 +89,15 @@ void initialScreen(){
     screen->clear();
     screen->write(0,0, "PRESS OPEN TO");
     screen->write(0,1, "ENTER WASTE");
+}
+
+void spillingWaste(){
+    screenSpilling();
+    servo->setPosition(OPEN_SERVO);
+}
+
+void screenSpilling(){
+    screen->clear();
+    screen->write(0,0, "PRESS CLOSE");
+    screen->write(0,1, "WHEN DONE");
 }

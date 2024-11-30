@@ -1,6 +1,7 @@
 #ifndef __TEMP__
 #define __TEMP__
 #define DHTTYPE DHT11
+#include<DHT.h>
 #include "DHT.h"
 
 class Temp{
