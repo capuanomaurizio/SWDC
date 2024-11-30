@@ -6,6 +6,7 @@
 #include "devices/Button.h" 
 #include "devices/Screen.h"
 #include "devices/Sonar.h"
+#include "devices/Temp.h"
 #include "serial/CommManager.h"
 
 #define LED_GREEN 7
@@ -17,7 +18,7 @@
 #define PIR 2
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 13
-#define TEMP_SENSOR A0
+#define TEMP_PIN A0
 
 #define CLOSE_SERVO 90
 #define OPEN_SERVO 180
@@ -32,11 +33,14 @@ Button* buttonClose;
 Screen* screen;
 CommManager* commManager;
 Sonar* sonar;
+Temp* temp;
 String requiredAction; //"check" "empty" "restore" are the possible messages
 
 void acceptingWaste();
 void initialScreen();
 void checkSerialComm();
+void screenSpilling();
+void spillingWaste();
 
 void setup() {
     ledGreen = new Led(LED_GREEN);
@@ -46,16 +50,19 @@ void setup() {
     buttonOpen = new Button(BUTTON_OPEN);
     buttonOpen = new Button(BUTTON_CLOSE);
     screen = new Screen(16, 4);
-    commManager = new CommManager();
-    requiredAction = "";
     sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN);
-    //acceptingWaste();
+    temp = new Temp(TEMP_PIN);
+    //commManager = new CommManager();
+    requiredAction = "";
+    Serial.begin(9600);
 }
 
 void loop() {
-    Serial.begin(9600);
-    long dick = sonar->getDistance();
-    Serial.println(dick);
+    long dick = temp->getTemperature();
+    // if(pir->isDetected()){
+        Serial.println(dick);
+    // }
+    delay(500);
     //checkSerialComm();
 }
 
