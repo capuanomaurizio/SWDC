@@ -1,4 +1,4 @@
-/*#include "Temp.h"
+#include "Temp.h"
 #include "Arduino.h"
 
 
@@ -9,4 +9,4 @@ Temp::Temp(int pin){
 
 float Temp::getTemperature(){
     return dht.readTemperature();
-}*/
+}

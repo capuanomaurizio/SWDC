@@ -1,13 +1,13 @@
 #include "Pir.h"
 #include "Arduino.h"
 
-Pir::Pir(int pin){
-    this->pin = pin;
-    pinMode(pin, INPUT);     
+Pir::Pir(int pirPin){
+    this->pin = pirPin;
+    pinMode(this->pin, INPUT);     
 } 
 
 bool Pir::isDetected(){
-    int detected = digitalRead(pin);
+    int detected = digitalRead(this->pin);
     if (detected == HIGH){
         return true;
     }

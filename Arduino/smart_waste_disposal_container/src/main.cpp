@@ -38,7 +38,6 @@ void initialScreen();
 void checkSerialComm();
 
 void setup() {
-    // Serial.begin(9600);
     ledGreen = new Led(LED_GREEN);
     ledRed = new Led(LED_RED);
     servo = new ServoImpl(SERVO);
