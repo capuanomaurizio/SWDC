@@ -15,7 +15,6 @@
 #define BUTTON_CLOSE 4
 #define PIR_PIN 2
 #define SERVO 9
-#define PIR 2
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 13
 #define TEMP_PIN A0
@@ -27,7 +26,8 @@
 Led* ledGreen;
 Led* ledRed;
 ServoImpl* servo;
-Pir* pir;
+// Pir* pir;
+Button* pir;
 Button* buttonOpen;
 Button* buttonClose;
 Screen* screen;
@@ -46,7 +46,8 @@ void setup() {
     ledGreen = new Led(LED_GREEN);
     ledRed = new Led(LED_RED);
     servo = new ServoImpl(SERVO);
-    pir = new Pir(PIR);
+    //pir = new Pir(PIR_PIN);
+    pir = new Button(PIR_PIN);
     buttonOpen = new Button(BUTTON_OPEN);
     buttonOpen = new Button(BUTTON_CLOSE);
     screen = new Screen(16, 4);
@@ -54,16 +55,10 @@ void setup() {
     temp = new Temp(TEMP_PIN);
     //commManager = new CommManager();
     requiredAction = "";
-    Serial.begin(9600);
 }
 
 void loop() {
-    long dick = temp->getTemperature();
-    // if(pir->isDetected()){
-        Serial.println(dick);
-    // }
-    delay(500);
-    //checkSerialComm();
+    
 }
 
 
