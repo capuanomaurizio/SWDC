@@ -23,13 +23,13 @@ CommManager* commManager;
 Sonar* sonar;
 Temp* temp;
 String requiredAction; //"check" "empty" "restore" are the possible messages
-const int MAXTEMP = 50;
+const int MAXTEMP = 17;
 const int MAXTEMPTIME = 5000;
 const int T1 = 7000;
 const int T2 = 4000;
 const int T3 = 3000;
 const long TIME_TO_SLEEP = 10000;
-const int MAX_FULLNESS = 10; // sarebbero 10 cm
+const int MAX_FULLNESS = 10; // 10 cm
 enum State { IDLE, WAITING_WASTE, SPILLING, FULL, TEMP_ALARM, SLEEPING };
 State currentState = IDLE;
 
@@ -38,10 +38,8 @@ volatile long lastUserDetection = 0;
 long startSpillingTime = 0;
 long tempAlarmStart = 0;
 bool tempProbDetected = false;
-bool emptying = false, emptied = false;
-bool restoring = false, restored = false;
+bool emptying = false, restoring = false;
 
-void initialScreen();
 void doneScreen();
 void fullScreen();
 void problemScreen();
@@ -56,6 +54,10 @@ void closeDoor();
 void emptyContainer();
 void handleTempAlarm();
 void screenSpilling();
+void checkSerialComm();
+void acceptingWaste();
+void startSpilling();
+bool checkSpillingTime();
 
 void setup() {
     ledGreen = new Led(LED_GREEN);
@@ -64,7 +66,7 @@ void setup() {
     //pir = new Pir(PIR_PIN);
     pir = new Button(PIR_PIN);
     buttonOpen = new Button(BUTTON_OPEN);
-    buttonOpen = new Button(BUTTON_CLOSE);
+    buttonClose = new Button(BUTTON_CLOSE);
     screen = new Screen(16, 4);
     sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN);
     temp = new Temp(TEMP_PIN);
@@ -78,6 +80,7 @@ void loop() {
         if (tempProbDetected) {
             if(currentState != TEMP_ALARM && ((millis() - tempAlarmStart) > MAXTEMPTIME)){
                 currentState = TEMP_ALARM;
+                problemScreen();
             }
         } else {
             tempAlarmStart = millis();
@@ -87,7 +90,7 @@ void loop() {
     else{
         tempProbDetected = false;
     }
-    if(currentState != SLEEPING && currentState != TEMP_ALARM && ((millis() - lastUserDetection) > TIME_TO_SLEEP)){
+    if(currentState == WAITING_WASTE && ((millis() - lastUserDetection) > TIME_TO_SLEEP)){
         goToSleep();
     }
     checkSerialComm();
@@ -107,22 +110,27 @@ void loop() {
             if(buttonClose->isClicked() || checkSpillingTime()){
                 closeDoor();
                 doneScreen();
+                currentState = IDLE;
             }
-            currentState = IDLE;
             if (readSonar() > MAX_FULLNESS){ 
                 closeDoor();           
                 fullScreen();
                 currentState = FULL;
             }
+            lastUserDetection = millis();
             break;
         case FULL:
             if (emptying) {
                 emptyScreen();
                 emptyContainer();
             }
+            lastUserDetection = millis();
             break;
         case TEMP_ALARM:
-            handleTempAlarm();
+            if (restoring) {
+                handleTempAlarm();
+            }
+            lastUserDetection = millis();
             break;
     }   
 }
@@ -134,16 +142,8 @@ void checkSerialComm(){
             commManager->sendPercentageTemperature(random(0,100), random(10, 60));
         } else if (requiredAction == "empty") {
             emptying = true;
-            if(emptied){
-                commManager->endEmptyContainer();
-                emptied = false;
-            }
         } else if (requiredAction == "restore") {
             restoring = true;
-            if (restored){
-                commManager->endRestoreContainer();
-                restored = false;
-            }
         }
     }
 }
@@ -159,7 +159,6 @@ void userDetected(){
 }
 
 void acceptingWaste(){
-    initialScreen();
     ledGreen->switchOn();
     servo->setPosition(CLOSE_SERVO);
     currentState = WAITING_WASTE;
@@ -180,18 +179,6 @@ void doneScreen(){
     screen->clear();
     screen->write(0, 0, "WASTE RECEIVED");
     delay(T2);
-}
-
-void fullScreen(){
-    screen->clear();
-    screen->write(0, 0, "CONTAINER FULL");
-    ledGreen->switchOff();
-    ledRed->switchOn();
-}
-
-void emptyScreen(){
-    screen->clear();
-    screen->write(0, 0, "EMPTYING...");
 }
 
 int readSonar(){
@@ -221,25 +208,34 @@ void closeDoor(){
     servo->setPosition(CLOSE_SERVO);
 }
 
-// non so se ci sia qualcosa da collegare alla parte in java
-void emptyContainer(){
+void emptyScreen(){
     screen->clear();
+    screen->write(0, 0, "EMPTYING...");
+}
+
+void emptyContainer(){
     servo->setPosition(EMPTY_SERVO);
     delay(T3);
     servo->setPosition(CLOSE_SERVO);
     currentState = IDLE;
     ledRed->switchOff();
-    emptied = true;
     emptying = false;
 }
 
 void handleTempAlarm(){
-    problemScreen();
     tempAlarmStart = 0;
     tempProbDetected = false;
     currentState = IDLE;
-    restored = true;
+    ledRed->switchOff();
     restoring = false;
+}
+
+void fullScreen(){
+    screen->clear();
+    screen->write(0, 0, "CONTAINER FULL");
+    ledGreen->switchOff();
+    ledRed->switchOn();
+    commManager->sendEmptyContainer();
 }
 
 void problemScreen(){
@@ -249,4 +245,5 @@ void problemScreen(){
     ledGreen->switchOff();
     ledRed->switchOn();
     closeDoor();
+    commManager->sendRestoreContainer();
 }

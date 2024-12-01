@@ -20,10 +20,10 @@ void CommManager::sendPercentageTemperature(int perc, int temp){
     MsgService.sendMsg((String)perc+":"+temp); 
 }
 
-void CommManager::endEmptyContainer(){
+void CommManager::sendEmptyContainer(){
     MsgService.sendMsg("emptied");
 }
 
-void CommManager::endRestoreContainer(){
+void CommManager::sendRestoreContainer(){
     MsgService.sendMsg("restored");
 }

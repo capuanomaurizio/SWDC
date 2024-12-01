@@ -42,10 +42,10 @@ public class SWDCDashboardView extends JFrame implements ActionListener{
 
 		JPanel buttonsPanel = new JPanel();
 		emptyContainer = new JButton("Empty container");
-		emptyContainer.setEnabled(true);
+		emptyContainer.setEnabled(false);
 		emptyContainer.addActionListener(this);
         restoreContainer = new JButton("Restore container");
-		restoreContainer.setEnabled(true);
+		restoreContainer.setEnabled(false);
 		restoreContainer.addActionListener(this);
         checkState = new JButton("Check state");
 		checkState.setEnabled(true);
@@ -106,14 +106,14 @@ public class SWDCDashboardView extends JFrame implements ActionListener{
         try {
             if (e.getSource() == emptyContainer){
                 controller.emptyContainer();
+				emptyContainer.setEnabled(false);
             } else if (e.getSource() == restoreContainer) {
                 controller.restoreContainer();
+				restoreContainer.setEnabled(false);
             } else if (e.getSource() == checkState) {
                 controller.checkContainerState();
+				checkState.setEnabled(false);
             }
-            emptyContainer.setEnabled(false);
-            restoreContainer.setEnabled(false);
-            checkState.setEnabled(false);
         } catch (Exception ex){
             ex.printStackTrace();
         }

@@ -13,7 +13,7 @@ public class SWDCDashboard {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String port = "COM4";
+        String port = "COM3";
         SWDCController controller = new SWDCController(port, dashboard, history);
         dashboard.setController(controller);
         SwingUtilities.invokeLater(() -> {

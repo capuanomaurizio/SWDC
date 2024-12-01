@@ -9,8 +9,8 @@ class CommManager {
         CommManager();
         String checkReceived();
         void sendPercentageTemperature(int perc, int temp);
-        void endEmptyContainer();
-        void endRestoreContainer();
+        void sendEmptyContainer();
+        void sendRestoreContainer();
 };
 
 #endif
