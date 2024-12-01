@@ -27,7 +27,7 @@ const int MAXTEMP = 50;
 const int MAXTEMPTIME = 5000;
 const int T1 = 7000;
 const int T2 = 4000;
-const int T1 = 3000;
+const int T3 = 3000;
 const long TIME_TO_SLEEP = 10000;
 const int MAX_FULLNESS = 10; // sarebbero 10 cm
 enum State { IDLE, WAITING_WASTE, SPILLING, FULL, TEMP_ALARM, EMPTYING, SLEEPING };
@@ -101,7 +101,7 @@ void loop() {
             lastUserDetection = millis();
         }
 
-        if(currentState != SLEEPING && millis() - lastUserDetection() > TIME_TO_SLEEP){
+        if(currentState != SLEEPING && millis() - lastUserDetection > TIME_TO_SLEEP){
             goToSleep();
         }
     }
@@ -127,7 +127,7 @@ void loop() {
             }
         
         case SPILLING:
-            if(buttonClose->isClicked || checkSpillingTime){
+            if(buttonClose->isClicked() || checkSpillingTime){
                 closeServo();
                 doneScreen();
                 if (readSonar()>MAX_FULLNESS){             
@@ -146,7 +146,7 @@ void loop() {
             
 
         case TEMP_ALARM:
-            if(millis() - tempAlarmStart() > MAXTEMP){
+            if(millis() - tempAlarmStart > MAXTEMP){
                 handleTempAlarm();
             }
         
@@ -249,7 +249,7 @@ void handleTempAlarm(){
     tempAlarmStart = 0;
     currentState = IDLE;
 }
-
+ 
 void screenSpilling(){
     screen->clear();
     screen->write(0,0, "PRESS CLOSE");
