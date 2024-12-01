@@ -48,8 +48,8 @@ int readSonar();
 float readTemperature();
 void goToSleep();
 void wakeUp();
-void openServo();
-void closeServo();
+void openDoor();
+void closeDoor();
 void emptyContainer();
 void handleTempAlarm();
 void screenSpilling();
@@ -94,41 +94,35 @@ void loop() {
         currentState = TEMP_ALARM;
         tempAlarmStart = millis();
     }
-
     else{
-
         if(currentState != SLEEPING && !userDetected()){
             lastUserDetection = millis();
         }
-
         if(currentState != SLEEPING && millis() - lastUserDetection > TIME_TO_SLEEP){
             goToSleep();
         }
     }
-
     switch (currentState){
-
         case SLEEPING:
             if(userDetected){
                 wakeUp();
             }
-
+            break;
         case IDLE:
-                initialScreen();
-                currentState = WAITING_WASTE;
-
-        
+            initialScreen();
+            currentState = WAITING_WASTE;
+            break;
         case WAITING_WASTE:
             if(buttonOpen->isClicked()){
-                openServo();
+                openDoor();
                 screenSpilling();
                 startSpillingTime = millis();
                 currentState = SPILLING;
             }
-        
+            break;
         case SPILLING:
             if(buttonClose->isClicked() || checkSpillingTime){
-                closeServo();
+                closeDoor();
                 doneScreen();
                 if (readSonar()>MAX_FULLNESS){             
                     fullScreen();
@@ -138,20 +132,17 @@ void loop() {
                     currentState = IDLE;
                 }
             }
-
-        // metto il break perchè andrebbe gestito dalla gui
+            break;
         case FULL:
             emptyScreen();
             emptyContainer();
-            
-
+            break;
         case TEMP_ALARM:
             if(millis() - tempAlarmStart > MAXTEMP){
                 handleTempAlarm();
             }
-        
-    }
-    
+            break;
+    }   
 }
 
 bool checkSpillingTime(){
@@ -221,16 +212,16 @@ void wakeUp(){
     currentState = IDLE;
 }
 
-void openServo(){
+void openDoor(){
     servo->setPosition(OPEN_SERVO);
 }
 
-void closeServo(){
+void closeDoor(){
     servo->setPosition(CLOSE_SERVO);
 }
 
 // non so se ci sia qualcosa da collegare alla parte in java
-void empyContainer(){
+void emptyContainer(){
     screen->clear();
     servo->setPosition(EMPTY_SERVO);
     delay(T3);
@@ -245,7 +236,7 @@ void handleTempAlarm(){
     problemScreen();
     ledGreen->switchOff();
     ledRed->switchOn();
-    closeServo();
+    closeDoor();
     tempAlarmStart = 0;
     currentState = IDLE;
 }
