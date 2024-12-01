@@ -30,14 +30,16 @@ const int T2 = 4000;
 const int T3 = 3000;
 const long TIME_TO_SLEEP = 10000;
 const int MAX_FULLNESS = 10; // sarebbero 10 cm
-enum State { IDLE, WAITING_WASTE, SPILLING, FULL, TEMP_ALARM, EMPTYING, SLEEPING };
+enum State { IDLE, WAITING_WASTE, SPILLING, FULL, TEMP_ALARM, SLEEPING };
 State currentState = IDLE;
 
 volatile bool buttonOpenPressed = false;
-bool userDetected = false;
-long lastUserDetection = 0;
+volatile long lastUserDetection = 0;
 long startSpillingTime = 0;
 long tempAlarmStart = 0;
+bool tempProbDetected = false;
+bool emptying = false, emptied = false;
+bool restoring = false, restored = false;
 
 void initialScreen();
 void doneScreen();
@@ -47,6 +49,7 @@ void emptyScreen();
 int readSonar();
 float readTemperature();
 void goToSleep();
+void userDetected();
 void wakeUp();
 void openDoor();
 void closeDoor();
@@ -65,8 +68,63 @@ void setup() {
     screen = new Screen(16, 4);
     sonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIG_PIN);
     temp = new Temp(TEMP_PIN);
-    //commManager = new CommManager();
+    commManager = new CommManager();
     requiredAction = "";
+    attachInterrupt(digitalPinToInterrupt(2), userDetected, RISING); 
+}
+
+void loop() {
+    if(readTemperature() > MAXTEMP){
+        if (tempProbDetected) {
+            if(currentState != TEMP_ALARM && ((millis() - tempAlarmStart) > MAXTEMPTIME)){
+                currentState = TEMP_ALARM;
+            }
+        } else {
+            tempAlarmStart = millis();
+            tempProbDetected = true;
+        } 
+    }
+    else{
+        tempProbDetected = false;
+    }
+    if(currentState != SLEEPING && currentState != TEMP_ALARM && ((millis() - lastUserDetection) > TIME_TO_SLEEP)){
+        goToSleep();
+    }
+    checkSerialComm();
+    switch (currentState){
+        case SLEEPING:
+            break;
+        case IDLE:
+            acceptingWaste();
+            break;
+        case WAITING_WASTE:
+            if(buttonOpen->isClicked()){
+                openDoor();
+                startSpilling();
+            }
+            break;
+        case SPILLING:
+            if(buttonClose->isClicked() || checkSpillingTime()){
+                closeDoor();
+                doneScreen();
+            }
+            currentState = IDLE;
+            if (readSonar() > MAX_FULLNESS){ 
+                closeDoor();           
+                fullScreen();
+                currentState = FULL;
+            }
+            break;
+        case FULL:
+            if (emptying) {
+                emptyScreen();
+                emptyContainer();
+            }
+            break;
+        case TEMP_ALARM:
+            handleTempAlarm();
+            break;
+    }   
 }
 
 void checkSerialComm(){
@@ -75,90 +133,47 @@ void checkSerialComm(){
         if(requiredAction == "check") {
             commManager->sendPercentageTemperature(random(0,100), random(10, 60));
         } else if (requiredAction == "empty") {
-            ledGreen->switchOn();
-            delay(200);
-            ledGreen->switchOff();
-            commManager->endEmptyContainer();
+            emptying = true;
+            if(emptied){
+                commManager->endEmptyContainer();
+                emptied = false;
+            }
         } else if (requiredAction == "restore") {
-            ledRed->switchOn();
-            delay(200);
-            ledRed->switchOff();
-            commManager->endRestoreContainer();
+            restoring = true;
+            if (restored){
+                commManager->endRestoreContainer();
+                restored = false;
+            }
         }
     }
-}
-
-void loop() {
-    // bisogna trovare un modo intelligente di gestire lo user detected
-    if(currentState != TEMP_ALARM && readTemperature() > MAXTEMP){
-        currentState = TEMP_ALARM;
-        tempAlarmStart = millis();
-    }
-    else{
-        if(currentState != SLEEPING && !userDetected()){
-            lastUserDetection = millis();
-        }
-        if(currentState != SLEEPING && millis() - lastUserDetection > TIME_TO_SLEEP){
-            goToSleep();
-        }
-    }
-    switch (currentState){
-        case SLEEPING:
-            if(userDetected){
-                wakeUp();
-            }
-            break;
-        case IDLE:
-            initialScreen();
-            currentState = WAITING_WASTE;
-            break;
-        case WAITING_WASTE:
-            if(buttonOpen->isClicked()){
-                openDoor();
-                screenSpilling();
-                startSpillingTime = millis();
-                currentState = SPILLING;
-            }
-            break;
-        case SPILLING:
-            if(buttonClose->isClicked() || checkSpillingTime){
-                closeDoor();
-                doneScreen();
-                if (readSonar()>MAX_FULLNESS){             
-                    fullScreen();
-                    currentState = FULL;
-                }
-                else{
-                    currentState = IDLE;
-                }
-            }
-            break;
-        case FULL:
-            emptyScreen();
-            emptyContainer();
-            break;
-        case TEMP_ALARM:
-            if(millis() - tempAlarmStart > MAXTEMP){
-                handleTempAlarm();
-            }
-            break;
-    }   
 }
 
 bool checkSpillingTime(){
     return ((millis() - startSpillingTime) > T1);
 }
 
-// dato che il pir è un pulsante non è proprio esatto isClicked così
-// bisognerebbe tenere sempre premuto il pulsante del pir
-bool userDetected(){
-    return pir->isClicked();
+void userDetected(){
+    lastUserDetection = millis();
+    if(currentState == SLEEPING)
+        wakeUp();
 }
 
-void initialScreen(){
+void acceptingWaste(){
+    initialScreen();
+    ledGreen->switchOn();
+    servo->setPosition(CLOSE_SERVO);
+    currentState = WAITING_WASTE;
     screen->clear();
     screen->write(0,0, "PRESS OPEN TO");
     screen->write(0,1, "ENTER WASTE");
+}
+ 
+void startSpilling(){
+    screen->clear();
+    screen->write(0,0, "PRESS CLOSE");
+    screen->write(0,1, "WHEN DONE");
+    startSpillingTime = millis();
+    currentState = SPILLING;
 }
 
 void doneScreen(){
@@ -174,21 +189,9 @@ void fullScreen(){
     ledRed->switchOn();
 }
 
-void problemScreen(){
-    screen->clear();
-    screen->write(0, 0, "PROBLEM");
-    screen->write(0, 1, "DETECTED");
-}
-
-void empyScreen(){
+void emptyScreen(){
     screen->clear();
     screen->write(0, 0, "EMPTYING...");
-}
-
-void acceptingWaste(){
-    initialScreen();
-    ledGreen->switchOn();
-    servo->setPosition(CLOSE_SERVO);
 }
 
 int readSonar(){
@@ -207,8 +210,6 @@ void goToSleep(){
 }
 
 void wakeUp(){
-    initialScreen();
-    ledGreen->switchOn();
     currentState = IDLE;
 }
 
@@ -227,22 +228,25 @@ void emptyContainer(){
     delay(T3);
     servo->setPosition(CLOSE_SERVO);
     currentState = IDLE;
-    initialScreen();
-    ledGreen->switchOn();
     ledRed->switchOff();
+    emptied = true;
+    emptying = false;
 }
 
 void handleTempAlarm(){
     problemScreen();
+    tempAlarmStart = 0;
+    tempProbDetected = false;
+    currentState = IDLE;
+    restored = true;
+    restoring = false;
+}
+
+void problemScreen(){
+    screen->clear();
+    screen->write(0, 0, "PROBLEM");
+    screen->write(0, 1, "DETECTED");
     ledGreen->switchOff();
     ledRed->switchOn();
     closeDoor();
-    tempAlarmStart = 0;
-    currentState = IDLE;
-}
- 
-void screenSpilling(){
-    screen->clear();
-    screen->write(0,0, "PRESS CLOSE");
-    screen->write(0,1, "WHEN DONE");
 }
