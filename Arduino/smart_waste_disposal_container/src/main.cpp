@@ -1,3 +1,12 @@
+/*
+@authors
+  source code produced by:
+    - Capuano Maurizio matr. 0001071194
+    - Sbrighi Patrick matr. 0001071460
+    - Tabaku Eraldo matr. 0001079949 
+*/
+
+
 #include <Arduino.h>
 
 #include "config.h"
