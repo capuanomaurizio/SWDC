@@ -23,13 +23,6 @@ CommManager* commManager;
 Sonar* sonar;
 Temp* temp;
 String requiredAction; //"check" "empty" "restore" are the possible messages
-const int MAXTEMP = 17;
-const int MAXTEMPTIME = 5000;
-const int T1 = 7000;
-const int T2 = 4000;
-const int T3 = 3000;
-const long TIME_TO_SLEEP = 10000;
-const int MAX_FULLNESS = 10; // 10 cm
 enum State { IDLE, WAITING_WASTE, SPILLING, FULL, TEMP_ALARM, SLEEPING };
 State currentState = IDLE;
 
@@ -112,7 +105,7 @@ void loop() {
                 doneScreen();
                 currentState = IDLE;
             }
-            if (readSonar() > MAX_FULLNESS){ 
+            if (readSonar() < FULL_THRESHOLD){ 
                 closeDoor();           
                 fullScreen();
                 currentState = FULL;
@@ -139,7 +132,7 @@ void checkSerialComm(){
     requiredAction = commManager->checkReceived();
     if(requiredAction != ""){
         if(requiredAction == "check") {
-            commManager->sendPercentageTemperature(random(0,100), random(10, 60));
+            commManager->sendPercentageTemperature((CAPACITY - sonar->getDistance())*100/(CAPACITY - FULL_THRESHOLD), temp->getTemperature());
         } else if (requiredAction == "empty") {
             emptying = true;
         } else if (requiredAction == "restore") {
