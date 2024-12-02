@@ -19,8 +19,8 @@
 #define MAXTEMP 50
 #define MAXTEMPTIME 5000
 #define T1 7000
-#define T2 4000
-#define T3 3000
+#define T2 3000
+#define T3 2000
 #define TIME_TO_SLEEP 10000
 #define FULL_THRESHOLD 10
 #define CAPACITY 50

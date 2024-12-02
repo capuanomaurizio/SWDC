@@ -14,8 +14,8 @@
 Led* ledGreen;
 Led* ledRed;
 ServoImpl* servo;
-// Pir* pir;
-Button* pir;
+Pir* pir;
+//Button* pir;
 Button* buttonOpen;
 Button* buttonClose;
 Screen* screen;
@@ -56,8 +56,8 @@ void setup() {
     ledGreen = new Led(LED_GREEN);
     ledRed = new Led(LED_RED);
     servo = new ServoImpl(SERVO);
-    //pir = new Pir(PIR_PIN);
-    pir = new Button(PIR_PIN);
+    pir = new Pir(PIR_PIN);
+    //pir = new Button(PIR_PIN);
     buttonOpen = new Button(BUTTON_OPEN);
     buttonClose = new Button(BUTTON_CLOSE);
     screen = new Screen(16, 4);
