@@ -16,6 +16,7 @@ public class SWDCDashboardView extends JFrame implements ActionListener{
     public SWDCDashboardView(){
         super(".:: Smart Waste Disposal Container ::.");
         setSize(600, 150);
+		this.setLocation(25, 25);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));

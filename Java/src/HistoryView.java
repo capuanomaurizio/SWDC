@@ -9,6 +9,7 @@ class HistoryView extends JFrame  {
 	public HistoryView(){
 		super("");
 		setSize(800,600);
+		this.setLocation(25, 200);
 
 		JPanel mainPanel = new JPanel();
 		log = new JTextArea(30,50);
